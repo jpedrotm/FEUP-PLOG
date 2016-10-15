@@ -38,5 +38,5 @@ piece_value('D',Value):-Value is 2.
 piece_value('P',Value):-Value is 1.
 piece_value(Rest,Value):-Value is 0.
 
-calc_value_linha(Value,[E|Es]):-piece_value(E,Val),Value1 is Val+Value,calc_value_linha(Value1,Es).
-calc_value_linha(Value,[]):-write(Value).
+calc_value_line(Value,[E|Es]):-piece_value(E,Val),Value1 is Val+Value,calc_value_line(Value1,Es).
+calc_value_line(Value,[]):-write(Value).
