@@ -5,6 +5,9 @@
   piece_simbol(pawn,'+').
   piece_simbol(empty,' ').
 
+  player_nr(player1, 0).
+  player_nr(player2, 1).
+
   /*Predicados para inicializar um tabuleiro de forma estática-----------------------------------------------------------------------------------------------------------------------------*/
 
   initialize_board(Board,Columns,Rows):-
@@ -46,7 +49,7 @@ get_dimensions(Columns,Rows):-
 piece_value(queen, Value):-Value is 3.
 piece_value(drone,Value):-Value is 2.
 piece_value(pawn,Value):-Value is 1.
-piece_value(Rest,Value):-Value is 0.
+piece_value(_,Value):-Value is 0.
 
 
 calc_divisions_points([L|Ls],NumLines,PlayerPoints1,PlayerPoints2):-
@@ -81,16 +84,13 @@ get_board_element(Board, X, Y, Elem):-
     nth0(Y, Board, Line),
     nth0(X, Line, Elem).
 
-move(Board,Xi,Yi,Xf,Yf,NewBoard):-
-           % Para o caso da a célula para onde quer mexer a peça estar para trás da célula
-  %  Yf<Yi, % onde se encontra.
-  %  write('YF<YI\n'),
-    % verify_initial_cell(Board,0,0,Xf,Yf,CellFinal),``
+move(Board,Xi,Yi,Xf,Yf,NewBoard,Player,NrPoints,NewPoints):-
+    % Para o caso da a célula para onde quer mexer a peça estar para trás da célula
     get_board_element(Board, Xf, Yf, FinalCell),
     write('Final Cell: '), write(FinalCell),nl,
     get_board_element(Board,Xi,Yi,InitialCell),
     write('Initial Cell: '),write(InitialCell),nl,
-    move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell).
+    move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell,Player,NrPoints,NewPoints).
 
 verify_empty_path(Board, Xi, Yf, Xf, Yf):-          % Horizontal Movement %
     XInc is round((Xf - Xi) / abs(Xf - Xi)),
@@ -125,13 +125,44 @@ is_in_own_half(Y, Player):-
     Y =< 3 + 4 * PlayerNr.
 
 crosses_board_half(Y, Player):-
-    player_nr(Player, PlayerNr),
     \+is_in_own_half(Y, Player).
 
-check_if_eats(Board, Xf, Yf, Player):-
+check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NewPoints, Piece, Piece):-
     crosses_board_half(Yf, Player),
+    get_board_element(Board, Xf, Yf, Elem), !,
+    piece_value(Elem, PieceValue),
+    NewPoints is NrPoints + PieceValue.
+
+check_post_movement_events(Board, Xf, Yf, Player, _, _, Piece, NewPiece):-
+    is_in_own_half(Yf, Player),
     get_board_element(Board, Xf, Yf, Elem),
-    Elem \= empty.
+    Elem = pawn,
+    Piece = pawn,
+    \+exists_on_board_half(Board, Player, pawn),
+    NewPiece = drone.
+
+check_post_movement_events(Board, Xf, Yf, Player, _, _, pawn, NewPiece):-
+    is_in_own_half(Yf, Player),
+    get_board_element(Board, Xf, Yf, Elem),
+    Elem = drone,
+    \+exists_on_board_half(Board, Player, queen),
+    NewPiece = queen.
+
+check_post_movement_events(Board, Xf, Yf, Player, _, _, drone, NewPiece):-
+    is_in_own_half(Yf, Player),
+    get_board_element(Board, Xf, Yf, Elem),
+    Elem = pawn,
+    \+exists_on_board_half(Board, Player, queen),
+    NewPiece = queen.
+
+check_post_movement_events(Board, Xf, Yf, Player, _, _, Piece, Piece):-
+    is_in_own_half(Yf, Player),
+    get_board_element(Board, Xf, Yf, empty).
+
+check_post_movement_events(_, _, _, _, _, _, _, _):-
+    write('Invalid movement'), nl,
+    fail.
+
 
 exists_on_line([Piece|_], Piece).
 
@@ -151,55 +182,54 @@ exists_on_board_half(Board, PlayerNr, Piece, N):-
     N1 is N + 1,
     exists_on_board_half(Board, PlayerNr, Piece, N1).
 
-
-move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,pawn):-
+% Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell,Player,NrPoints,NewPoints
+move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,pawn,Player,NrPoints,NewPoints):-
     XDif is Xf-Xi,
     YDif is Yf-Yi,
     XMod is XDif*XDif,
     YMod is YDif*YDif,
     XMod=1,
     YMod=1,
+    check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NewPoints, pawn, NewPiece),
     put_on_board(Yi,Xi,empty,Board,Board1),
-    put_on_board(Yf,Xf,pawn,Board1,NewBoard).
+    put_on_board(Yf,Xf,NewPiece,Board1,NewBoard).
 
-move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
+move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,drone,Player,NrPoints,NewPoints):-
     Yf-Yi >= -2,
     Yf-Yi =< 2,
     verify_empty_path(Board, Xf, Yi, Xf, Yf),
-    % TODO: verify if eats anything %
+    check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NewPoints, drone, NewPiece),
     put_on_board(Yi, Xf, empty, Board, Board1),
-    put_on_board(Yf, Xf, drone, Board1, NewBoard).
+    put_on_board(Yf, Xf, NewPiece, Board1, NewBoard).
 
-move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,drone):-
+move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,drone,Player,NrPoints,NewPoints):-
     Xf-Xi >= -2,
     Xf-Xi =< 2,
     verify_empty_path(Board, Xi, Yi, Xf, Yf),
-    % TODO: verify if eats anything %
+    check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NewPoints, drone, NewPiece),
     put_on_board(Yf, Xi, empty, Board, Board1),
-    put_on_board(Yf, Xf, drone, Board1, NewBoard).
+    put_on_board(Yf, Xf, newPiece, Board1, NewBoard).
 
-move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,queen):-
-    move_piece_any_direction(Board,NewBoard,Xf,Yi,Xf,Yf,queen).
+move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,queen,Player,NrPoints,NewPoints):-
+    move_piece_any_direction(Board,NewBoard,Xf,Yi,Xf,Yf,queen,Player,NrPoints,NewPoints).
 
-move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,queen):-
-    move_piece_any_direction(Board,NewBoard,Xi,Yf,Xf,Yf,queen).
+move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,queen,Player,NrPoints,NewPoints):-
+    move_piece_any_direction(Board,NewBoard,Xi,Yf,Xf,Yf,queen,Player,NrPoints,NewPoints).
 
-move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,queen,Player,NrPoints,NewPoints):-
     XDif is Xf - Xi,
     YDif is Yf - Yi,
     XMod is XDif * XDif,
     YMod is YDif * YDif,
     XMod = YMod,
-
-    move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen).
-
+    move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen,Player,NrPoints,NewPoints).
 
 
-move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen,Player,NrPoints,NewPoints):-
     verify_empty_path(Board, Xi, Yi, Xf, Yf),
-    % TODO: verify if eats anything %
+    check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NewPoints, queen, NewPiece),
     put_on_board(Yi,Xi,empty,Board,Board1),
-    put_on_board(Yf,Xf,queen,Board1,NewBoard).
+    put_on_board(Yf,Xf,NewPiece,Board1,NewBoard).
 
 
 move_piece(Board,NewBoard,_,_,_,_,Cell):-
