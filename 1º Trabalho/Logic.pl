@@ -141,13 +141,39 @@ place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,pawn):-
     write('VALIDOU\n');
     NewBoard = Board.
 
-place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,drone):-
-  Xi=Xf,
-  YDif is Yf-Yi,
-  YDif>0,
-  YDif<=2.
+place_cell(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
+    Yf-Yi >= -2,
+    Yf-Yi <= 2,
+    verify_empty_path(Board, NewBoard, Xf, Yi, Xf, Yf),
+    % TODO: verify if eats anything %
+    putOnBoard(Yi, Xi, empty, Board, Board1),
+    putOnBoard(Yf, Xg, drone, Board1, NewBoard).
 
+place_cell(Board,NewBoard,Xi,Yf,Xf,Yf,drone):-
+    Yf-Yi >= -2,
+    Yf-Yi <= 2,
+    verify_empty_path(Board, NewBoard, Xf, Yi, Xf, Yf),
+    % TODO: verify if eats anything %
+    putOnBoard(Yi, Xi, empty, Board, Board1),
+    putOnBoard(Yf, Xg, drone, Board1, NewBoard).
 
+place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+    XDif is Xf - Xi,
+    YDif is Yf - Yi
+    XDif * XDif = YDif * YDif,
+    place_cell_any_movement(Board,NewBoard,Xi,Yi,Xf,Yf,queen).
+
+place_cell(Board,NewBoard,Xf,Yi,Xf,Yf,queen):-
+    place_cell_any_movement(Board,NewBoard,Xf,Yi,Xf,Yf,queen).
+
+place_cell(Board,NewBoard,Xi,Yg,Xf,Yf,queen):-
+    place_cell_any_movement(Board,NewBoard,Xi,Yf,Xf,Yf,queen).
+
+place_cell_any_movement(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+    verify_empty_path(Board, Xi, Yi, Xf, Yf),
+    % TODO: verify if eats anything %
+    putOnBoard(Yi,Xi,empty,Board,Board1),
+    putOnBoard(Yf,Xf,queen,Board1,NewBoard).
 
 
 place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,Cell):-
