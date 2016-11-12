@@ -14,7 +14,7 @@ askMenuOption(Option):-
 
 askPlayerCoordinates(Xi,Yi,Xf,Yf,Player):-
   nl,
-  translate_player_num(Player,Num),
+  player_nr(Player,Num),
   translate_player_name(Player,Name),
   YMin is 4*Num,
   YMax is YMin+4,

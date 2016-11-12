@@ -133,7 +133,7 @@ check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NewPoints, Piece, Pi
     piece_value(Elem, PieceValue),
     NewPoints is NrPoints + PieceValue.
 
-check_post_movement_events(Board, Xf, Yf, Player, _, _, Piece, NewPiece):-
+check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NrPoints, Piece, NewPiece):-
     is_in_own_half(Yf, Player),
     get_board_element(Board, Xf, Yf, Elem),
     Elem = pawn,
@@ -141,26 +141,26 @@ check_post_movement_events(Board, Xf, Yf, Player, _, _, Piece, NewPiece):-
     \+exists_on_board_half(Board, Player, pawn),
     NewPiece = drone.
 
-check_post_movement_events(Board, Xf, Yf, Player, _, _, pawn, NewPiece):-
+check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NrPoints, pawn, NewPiece):-
     is_in_own_half(Yf, Player),
     get_board_element(Board, Xf, Yf, Elem),
     Elem = drone,
     \+exists_on_board_half(Board, Player, queen),
     NewPiece = queen.
 
-check_post_movement_events(Board, Xf, Yf, Player, _, _, drone, NewPiece):-
+check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NrPoints, drone, NewPiece):-
     is_in_own_half(Yf, Player),
     get_board_element(Board, Xf, Yf, Elem),
     Elem = pawn,
     \+exists_on_board_half(Board, Player, queen),
     NewPiece = queen.
 
-check_post_movement_events(Board, Xf, Yf, Player, _, _, Piece, Piece):-
+check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NrPoints, Piece, Piece):-
     is_in_own_half(Yf, Player),
     get_board_element(Board, Xf, Yf, empty).
 
 check_post_movement_events(_, _, _, _, _, _, _, _):-
-    write('Invalid movement'), nl,
+    nl, write('Invalid movement'), nl,
     fail.
 
 

@@ -26,13 +26,12 @@ game_play(Board,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
   move(Board,Xi1,Yi1,Xf1,Yf1,NewBoard, player1, PlayerTopPoints, NewPTPoints),
   display_total_board(NewBoard,Rows,Columns),
   calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
-  display_points_division(TopPoints1,BottomPoints1),
-  write('Player1 points: '), write(NewPTPoints), write('    Player2 points: '), write(PlayerBottomPoints), nl,
+  display_points_division(NewPTPoints,PlayerBottomPoints),
   askPlayerCoordinates(Xi2,Yi2,Xf2,Yf2,player2),
   move(NewBoard,Xi2,Yi2,Xf2,Yf2,NewBoard1, player2, PlayerBottomPoints, NewPBPoints),
   display_total_board(NewBoard1,Rows,Columns),
   calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
-  display_points_division(TopPoints2,BottomPoints2),
+  display_points_division(NewPTPoints,NewPBPoints),
   game_play(NewBoard1,Columns,Rows,PlayerTopPoints,PlayerBottomPoints).
 
 /* Menu fim de jogo ----------------------------------------------------------*/
