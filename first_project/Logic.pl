@@ -5,24 +5,21 @@
   piece_simbol(pawn,'+').
   piece_simbol(empty,' ').
 
-  player_nr(player1, 0).
-  player_nr(player2, 1).
-
-  /*Função para inicializar um tabuleiro de forma estática-----------------------------------------------------------------------------------------------------------------------------*/
+  /*Predicados para inicializar um tabuleiro de forma estática-----------------------------------------------------------------------------------------------------------------------------*/
 
   initialize_board(Board,Columns,Rows):-
     Columns is 4,
     Rows is 8,
     Board=[[queen,queen,drone,empty],
-           [queen,drone,pawn,empty],
-           [drone,pawn,pawn,empty],
+           [empty,empty,empty,empty],
+           [empty,empty,empty,empty],
            [empty,empty,empty,empty],
            [empty,empty,empty,empty],
            [empty,pawn,pawn,drone],
            [empty,pawn,drone,queen],
            [empty,drone,queen,queen]].
 
-/*Funções responsáveis por gerar o tabuleiro vazio de forma dinámica-------------------------------------------------------------------------------------------------------------------*/
+/*Predicados responsáveis por gerar o tabuleiro vazio de forma dinámica-------------------------------------------------------------------------------------------------------------------*/
 generate_line([],0).
 
 generate_line([E|Es],N):-
@@ -44,33 +41,33 @@ get_dimensions(Columns,Rows):-
   write('Indique o numero de linhas: \n'),
   read(Rows).
 
-  /*Funções responsáveis por identificar as peças de jogo e calcular os pontos totais numa só linha--------------------------------------------------------------------------------------*/
+  /*Predicados responsáveis por identificar as peças de jogo e calcular os pontos totais de cada divisão--------------------------------------------------------------------------------------*/
 
 piece_value(queen, Value):-Value is 3.
 piece_value(drone,Value):-Value is 2.
 piece_value(pawn,Value):-Value is 1.
-piece_value(_,Value):-Value is 0.
+piece_value(Rest,Value):-Value is 0.
 
 
-calc_players_points([L|Ls],NumLines,PlayerPoints1,PlayerPoints2):-
-  calc_points([L|Ls],NumLines,0,PlayerPoints1,0,PlayerPoints2,0).
+calc_divisions_points([L|Ls],NumLines,PlayerPoints1,PlayerPoints2):-
+  calc_division([L|Ls],NumLines,0,PlayerPoints1,0,PlayerPoints2,0).
 
-calc_points([L|Ls],NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine):-
+calc_division([L|Ls],NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine):-
     CurrLine<NumLines,
     CurrLine>round(NumLines/2),
     CurrLine1 is CurrLine+1,
     calc_value_line(L,LinePoints),
     CurrPlayerPoints11 is CurrPlayerPoints1+LinePoints,
-    calc_points(Ls,NumLines,CurrPlayerPoints11,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine1).
+    calc_division(Ls,NumLines,CurrPlayerPoints11,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine1).
 
-calc_points([L|Ls],NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine):-
+calc_division([L|Ls],NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine):-
     CurrLine<NumLines,
     CurrLine1 is CurrLine+1,
     calc_value_line(L,LinePoints),
     CurrPlayerPoints21 is CurrPlayerPoints2+LinePoints,
-    calc_points(Ls,NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints21,PlayerPoints2,CurrLine1).
+    calc_division(Ls,NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints21,PlayerPoints2,CurrLine1).
 
-calc_points([],NumLines,FinalPoints1,FinalPoints1,FinalPoints2,FinalPoints2,NumLines).
+calc_division([],NumLines,FinalPoints1,FinalPoints1,FinalPoints2,FinalPoints2,NumLines).
 
 sum_line([], FinalValue, FinalValue).
 sum_line([E|Es], CurrValue, FinalValue) :- piece_value(E,Val),CurrValue1 is CurrValue + Val, sum_line(Es, CurrValue1, FinalValue).
@@ -79,10 +76,10 @@ calc_value_line([], 0).
 calc_value_line(L, Value) :- sum_line(L,0,Value).
 
 
-  /*Funções responsáveis por mover peças de jogo e a sua verificação -------------------------------------------------------------------------------------------------------------------*/
+/*Predicados responsáveis por mover peças de jogo e a sua verificação -------------------------------------------------------------------------------------------------------------------*/
 get_board_element(Board, X, Y, Elem):-
-    nth0(Board, Y, Line),
-    nth0(Line, X, Elem).
+    nth0(Y, Board, Line),
+    nth0(X, Line, Elem).
 
 move(Board,Xi,Yi,Xf,Yf,NewBoard):-
            % Para o caso da a célula para onde quer mexer a peça estar para trás da célula
@@ -91,21 +88,28 @@ move(Board,Xi,Yi,Xf,Yf,NewBoard):-
     % verify_initial_cell(Board,0,0,Xf,Yf,CellFinal),``
     get_board_element(Board, Xf, Yf, FinalCell),
     write('Final Cell: '), write(FinalCell),nl,
-    get_board_element(Board,Xi,Yi,FinalCell),
+    get_board_element(Board,Xi,Yi,InitialCell),
     write('Initial Cell: '),write(InitialCell),nl,
-    move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell),
-    display_board(NewBoard,8,4,0).
+    move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell).
 
 verify_empty_path(Board, Xi, Yf, Xf, Yf):-          % Horizontal Movement %
-    verify_empty_path(Board, Xi, Yf, Xf, Yf, 1, 0).
+    XInc is round((Xf - Xi) / abs(Xf - Xi)),
+    Xf1 is Xf - XInc,
+    verify_empty_path(Board, Xi, Yf, Xf1, Yf, XInc, 0).
 
 verify_empty_path(Board, Xf, Yi, Xf, Yf):-          % Vertical Movement %
-    verify_empty_path(Board, Xf, Yi, Xf, Yf, 0, 1).
+    YInc is round((Yf - Yi) / abs(Yf - Yi)),
+    Yf1 is Yf - YInc,
+    verify_empty_path(Board, Xf, Yi, Xf, Yf1, 0, YInc).
 
 verify_empty_path(Board, Xi, Yi, Xf, Yf):-          % Diagonal Movement %
-    verify_empty_path(Board, Xi, Yi, Xf, Yf, 1, 1).
+    XInc is round((Xf - Xi) / abs(Xf - Xi)),
+    YInc is round((Yf - Yi) / abs(Yf - Yi)),
+    Xf1 is Xf - XInc,
+    Yf1 is Yf - YInc,
+    verify_empty_path(Board, Xi, Yi, Xf1, Yf1, XInc, YInc).
 
-verify_empty_path(Board, Xf-1, Yf-1, Xf, Yf, XInc, YInc).
+verify_empty_path(Board, Xf, Yf, Xf, Yf, XInc, YInc).
 
 verify_empty_path(Board, Xi, Yi, Xf, Yf, XInc, YInc):-
     X1 is Xi + XInc,
@@ -141,7 +145,7 @@ exists_on_board_half(Board, Player, Piece):-
 exists_on_board_half(Board, PlayerNr, Piece, N):-
     N<4,
     LineNr is N + PlayerNr * 4,
-    nth0(Board, LineNr, Line),
+    nth0(LineNr, Board, Line),
     exists_on_line(Line, Piece);
     N<4,
     N1 is N + 1,
@@ -161,7 +165,7 @@ move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,pawn):-
 move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
     Yf-Yi >= -2,
     Yf-Yi =< 2,
-    verify_empty_path(Board, NewBoard, Xf, Yi, Xf, Yf),
+    verify_empty_path(Board, Xf, Yi, Xf, Yf),
     % TODO: verify if eats anything %
     put_on_board(Yi, Xf, empty, Board, Board1),
     put_on_board(Yf, Xf, drone, Board1, NewBoard).
@@ -169,22 +173,27 @@ move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
 move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,drone):-
     Xf-Xi >= -2,
     Xf-Xi =< 2,
-    verify_empty_path(Board, NewBoard, Xi, Yi, Xf, Yf),
+    verify_empty_path(Board, Xi, Yi, Xf, Yf),
     % TODO: verify if eats anything %
     put_on_board(Yf, Xi, empty, Board, Board1),
     put_on_board(Yf, Xf, drone, Board1, NewBoard).
-
-move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
-    XDif is Xf - Xi,
-    YDif is Yf - Yi,
-    XDif * XDif = YDif * YDif,
-    move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen).
 
 move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,queen):-
     move_piece_any_direction(Board,NewBoard,Xf,Yi,Xf,Yf,queen).
 
 move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,queen):-
     move_piece_any_direction(Board,NewBoard,Xi,Yf,Xf,Yf,queen).
+
+move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+    XDif is Xf - Xi,
+    YDif is Yf - Yi,
+    XMod is XDif * XDif,
+    YMod is YDif * YDif,
+    XMod = YMod,
+
+    move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen).
+
+
 
 move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
     verify_empty_path(Board, Xi, Yi, Xf, Yf),
@@ -212,3 +221,43 @@ put_on_column(I, Elem, [H|L], [H|ResL]):-
   	I > 0,
   	I1 is I - 1,
   	put_on_column(I1, Elem, L, ResL).
+
+verify_initial_cell([L|Ls],Xi,Yi,Xf,Yf,Cell):-
+    Yi<Yf,
+    Yi1 is Yi+1,
+    verify_initial_cell(Ls,Xi,Yi1,Xf,Yf,Cell).
+
+verify_initial_cell([],_,_,_,_,Cell):-
+    write('Fim de lista de listas, valor de Y demasiado elevado.\n').
+
+verify_initial_cell([L|Ls],Xi,Yi,Xf,Yf,Cell):-
+    Yi=Yf,
+    write('\nINTO row_cell.'),
+    verify_row_cell(L,0,Xf,Cell).
+
+verify_row_cell([E|Es],Xi,Xf,Cell):-
+    Xi<Xf,
+    Xi1 is Xi+1,
+    verify_row_cell(Es,Xi1,Xf,Cell).
+
+verify_row_cell([E|Es],Xf,Xf,Cell):-
+    Cell=E.
+
+verify_row_cell([],_,_,Cell):-
+    write('Fim da lista de elementos, valor de X demasiado grande.\n').
+
+/* Predicado para verificação do termino do jogo------------------------------*/
+verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints,Continue):-
+  Continue is 0,
+  end_menu(PlayerTopPoints,PlayerBottomPoints).
+
+verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints,Continue):-
+  Continue is 0,
+  end_menu(PlayerTopPoints,PlayerBottomPoints).
+
+verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints,Continue):-
+  Continue is 0,
+  end_menu(PlayerTopPoints,PlayerBottomPoints).
+
+verify_end_game(_,_,_,_,Continue):-
+  Continue is 1.

@@ -1,4 +1,19 @@
-/*Funções responsáveis por fazer display do tabuleiro----------------------------------------------------------------------------------------------------------------------------------*/
+/* Predicado responsável por display do menu inicial--------------------------------------------------------------------------------------------------------------------------------------*/
+display_menu:-
+  write('-------------------------------------------------\n'),
+  write('----------------- MARTIAN CHESS -----------------\n'),
+  write('-------------------------------------------------\n'),
+  write('------------- 1 - Player vs Player. -------------\n'),
+  write('--------------- 2 - Player vs cpu. --------------\n'),
+  write('--------------- 3 - cpu vs cpu. -----------------\n'),
+  write('------------------ 4 - Exit.  -------------------\n'),
+  write('-------------------------------------------------\n').
+
+/*Predicados responsáveis por fazer display do tabuleiro----------------------------------------------------------------------------------------------------------------------------------*/
+display_total_board(Board,Rows,Columns):-
+  display_cols(0,Columns),
+  display_board(Board,Rows,Columns,0).
+
 display_board([L|Ls],Rows,Columns,I):-
   TempRows is round(Rows/2),
   I=TempRows,
@@ -21,7 +36,7 @@ display_board([],Rows,Columns,I):-
   NumberCols is Columns*5,
   display_horizontal(NumberCols).
 
-/*Função responsável por dar display dos elementos das listas*/
+/*Predicados responsável por dar display dos elementos das listas*/
 display_line_elems([E|Es],I):-
   write('   '),
   write(I),
@@ -71,3 +86,11 @@ display_boundary(N):-
   write(''),
   display_boundary(N1).
 display_boundary(0):-nl.
+
+/*Display points of each division of the board*/
+display_points_division(PlayerTopPoints,PlayerBottomPoints):-
+  write('Top Points: '),
+  write(PlayerTopPoints),
+  nl,
+  write('Bottom Points: '),
+  write(PlayerBottomPoints).
