@@ -146,16 +146,16 @@ place_cell(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
     Yf-Yi <= 2,
     verify_empty_path(Board, NewBoard, Xf, Yi, Xf, Yf),
     % TODO: verify if eats anything %
-    putOnBoard(Yi, Xi, empty, Board, Board1),
-    putOnBoard(Yf, Xg, drone, Board1, NewBoard).
+    putOnBoard(Yi, Xf, empty, Board, Board1),
+    putOnBoard(Yf, Xf, drone, Board1, NewBoard).
 
 place_cell(Board,NewBoard,Xi,Yf,Xf,Yf,drone):-
     Yf-Yi >= -2,
     Yf-Yi <= 2,
-    verify_empty_path(Board, NewBoard, Xf, Yi, Xf, Yf),
+    verify_empty_path(Board, NewBoard, Xi, Yi, Xf, Yf),
     % TODO: verify if eats anything %
-    putOnBoard(Yi, Xi, empty, Board, Board1),
-    putOnBoard(Yf, Xg, drone, Board1, NewBoard).
+    putOnBoard(Yf, Xi, empty, Board, Board1),
+    putOnBoard(Yf, Xf, drone, Board1, NewBoard).
 
 place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
     XDif is Xf - Xi,
