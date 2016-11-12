@@ -108,6 +108,25 @@ move(Board,Xi,Yi,Xf,Yf):-
     place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,CellFinal),
     display_board(NewBoard,8,4,0).
 
+verify_empty_path(Board, Xi, Yf, Xf, Yf):-          % Horizontal Movement %
+    verify_empty_path(Board, Xi, Yf, Xf, Yf, 1, 0).
+
+verify_empty_path(Board, Xf, Yi, Xf, Yf):-          % Vertical Movement %
+    verify_empty_path(Board, Xf, Yi, Xf, Yf, 0, 1).
+
+verify_empty_path(Board, Xi, Yi, Xf, Yf):-          % Diagonal Movement %
+    verify_empty_path(Board, Xi, Yi, Xf, Yf, 1, 1).
+
+verify_empty_path(Board, Xf-1, Yf-1, Xf, Yf, XInc, YInc).
+
+verify_empty_path(Board, Xi, Yi, Xf, Yf, XInc, YInc):-
+    X1 is Xi + XInc,
+    Y1 is Yi + YInc,
+    nth0(Y1, Board, Line),
+    nth0(X1, Line, Elem),
+    Elem = empty,
+    verify_empty_path(Board, X1, Y1, Xf, Yf, XInc, YInc).
+
 place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,pawn):-
     XDif is Xf-Xi,
     YDif is Yf-Yi,
