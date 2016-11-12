@@ -5,6 +5,9 @@
   piece_simbol(pawn,'+').
   piece_simbol(empty,' ').
 
+  player_nr(player1, 0).
+  player_nr(player2, 1).
+
   /*Função para inicializar um tabuleiro de forma estática-----------------------------------------------------------------------------------------------------------------------------*/
 
   initialize_board(Board,Columns,Rows):-
@@ -46,7 +49,7 @@ get_dimensions(Columns,Rows):-
 piece_value(queen, Value):-Value is 3.
 piece_value(drone,Value):-Value is 2.
 piece_value(pawn,Value):-Value is 1.
-piece_value(Rest,Value):-Value is 0.
+piece_value(_,Value):-Value is 0.
 
 
 calc_players_points([L|Ls],NumLines,PlayerPoints1,PlayerPoints2):-
@@ -77,35 +80,20 @@ calc_value_line(L, Value) :- sum_line(L,0,Value).
 
 
   /*Funções responsáveis por mover peças de jogo e a sua verificação -------------------------------------------------------------------------------------------------------------------*/
+get_board_element(Board, X, Y, Elem):-
+    nth0(Board, Y, Line),
+    nth0(Line, X, Elem).
+
 move(Board,Xi,Yi,Xf,Yf,NewBoard):-
            % Para o caso da a célula para onde quer mexer a peça estar para trás da célula
-    Yf<Yi, % onde se encontra.
-    write('YF<YI\n'),
-    verify_initial_cell(Board,0,0,Xf,Yf,CellFinal),
-    write('Casa final: '), write(CellFinal),nl,
-    verify_initial_cell(Board,0,0,Xi,Yi,CellInitial),
-    write('Case inicial: '),write(CellInitial),nl,
-    place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,CellInitial),
-    display_board(NewBoard,8,4,0).
-
-move(Board,Xi,Yi,Xf,Yf):-
-    Yi=Yf,
-    Xf<Xi,
-    write('XF<XI   YF<YI\n'),
-    verify_initial_cell(Board,0,0,Xf,Yf,CellFinal),
-    write('Casa final: '), write(CellFinal),nl,
-    verify_initial_cell(Board,0,0,Xi,Yi,CellInitial),
-    write('Case inicial: '),write(CellInitial),nl,
-    place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,CellInitial),
-    display_board(NewBoard,8,4,0).
-
-move(Board,Xi,Yi,Xf,Yf):-
-    Yf>=Yi,
-    verify_initial_cell(Board,0,0,Xf,Yf,CellInitial),
-    write('Casa inicial: '), write(CellInitial),nl,
-    verify_initial_cell(Board,0,0,Xi,Yi,CellFinal),
-    write('Case final: '),write(CellFinal),nl,
-    place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,CellFinal),
+  %  Yf<Yi, % onde se encontra.
+  %  write('YF<YI\n'),
+    % verify_initial_cell(Board,0,0,Xf,Yf,CellFinal),``
+    get_board_element(Board, Xf, Yf, FinalCell),
+    write('Final Cell: '), write(FinalCell),nl,
+    get_board_element(Board,Xi,Yi,FinalCell),
+    write('Initial Cell: '),write(InitialCell),nl,
+    move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell),
     display_board(NewBoard,8,4,0).
 
 verify_empty_path(Board, Xi, Yf, Xf, Yf):-          % Horizontal Movement %
@@ -127,95 +115,100 @@ verify_empty_path(Board, Xi, Yi, Xf, Yf, XInc, YInc):-
     Elem = empty,
     verify_empty_path(Board, X1, Y1, Xf, Yf, XInc, YInc).
 
-place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,pawn):-
+is_in_own_half(Y, Player):-
+    player_nr(Player, PlayerNr),
+    Y >= 0 + 4 * PlayerNr,
+    Y =< 3 + 4 * PlayerNr.
+
+crosses_board_half(Y, Player):-
+    player_nr(Player, PlayerNr),
+    \+is_in_own_half(Y, Player).
+
+check_if_eats(Board, Xf, Yf, Player):-
+    crosses_board_half(Yf, Player),
+    get_board_element(Board, Xf, Yf, Elem),
+    Elem \= empty.
+
+exists_on_line([Piece|_], Piece).
+
+exists_on_line([_|Line], Piece):-
+    exists_on_line(Line, Piece).
+
+exists_on_board_half(Board, Player, Piece):-
+    player_nr(Player, PlayerNr),
+    exists_on_board_half(Board, PlayerNr, Piece, 0).
+
+exists_on_board_half(Board, PlayerNr, Piece, N):-
+    N<4,
+    LineNr is N + PlayerNr * 4,
+    nth0(Board, LineNr, Line),
+    exists_on_line(Line, Piece);
+    N<4,
+    N1 is N + 1,
+    exists_on_board_half(Board, PlayerNr, Piece, N1).
+
+
+move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,pawn):-
     XDif is Xf-Xi,
     YDif is Yf-Yi,
     XMod is XDif*XDif,
     YMod is YDif*YDif,
     XMod=1,
     YMod=1,
-    write('VOU PARA O SWITCH\n'),
-    putOnBoard(Yi,Xi,empty,Board,Board1),
-    putOnBoard(Yf,Xf,pawn,Board1,NewBoard),
-    Changed is 1,
-    write('VALIDOU\n');
-    NewBoard = Board.
+    put_on_board(Yi,Xi,empty,Board,Board1),
+    put_on_board(Yf,Xf,pawn,Board1,NewBoard).
 
-place_cell(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
+move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,drone):-
     Yf-Yi >= -2,
-    Yf-Yi <= 2,
+    Yf-Yi =< 2,
     verify_empty_path(Board, NewBoard, Xf, Yi, Xf, Yf),
     % TODO: verify if eats anything %
-    putOnBoard(Yi, Xf, empty, Board, Board1),
-    putOnBoard(Yf, Xf, drone, Board1, NewBoard).
+    put_on_board(Yi, Xf, empty, Board, Board1),
+    put_on_board(Yf, Xf, drone, Board1, NewBoard).
 
-place_cell(Board,NewBoard,Xi,Yf,Xf,Yf,drone):-
-    Yf-Yi >= -2,
-    Yf-Yi <= 2,
+move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,drone):-
+    Xf-Xi >= -2,
+    Xf-Xi =< 2,
     verify_empty_path(Board, NewBoard, Xi, Yi, Xf, Yf),
     % TODO: verify if eats anything %
-    putOnBoard(Yf, Xi, empty, Board, Board1),
-    putOnBoard(Yf, Xf, drone, Board1, NewBoard).
+    put_on_board(Yf, Xi, empty, Board, Board1),
+    put_on_board(Yf, Xf, drone, Board1, NewBoard).
 
-place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
     XDif is Xf - Xi,
-    YDif is Yf - Yi
+    YDif is Yf - Yi,
     XDif * XDif = YDif * YDif,
-    place_cell_any_movement(Board,NewBoard,Xi,Yi,Xf,Yf,queen).
+    move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen).
 
-place_cell(Board,NewBoard,Xf,Yi,Xf,Yf,queen):-
-    place_cell_any_movement(Board,NewBoard,Xf,Yi,Xf,Yf,queen).
+move_piece(Board,NewBoard,Xf,Yi,Xf,Yf,queen):-
+    move_piece_any_direction(Board,NewBoard,Xf,Yi,Xf,Yf,queen).
 
-place_cell(Board,NewBoard,Xi,Yg,Xf,Yf,queen):-
-    place_cell_any_movement(Board,NewBoard,Xi,Yf,Xf,Yf,queen).
+move_piece(Board,NewBoard,Xi,Yf,Xf,Yf,queen):-
+    move_piece_any_direction(Board,NewBoard,Xi,Yf,Xf,Yf,queen).
 
-place_cell_any_movement(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
+move_piece_any_direction(Board,NewBoard,Xi,Yi,Xf,Yf,queen):-
     verify_empty_path(Board, Xi, Yi, Xf, Yf),
     % TODO: verify if eats anything %
-    putOnBoard(Yi,Xi,empty,Board,Board1),
-    putOnBoard(Yf,Xf,queen,Board1,NewBoard).
+    put_on_board(Yi,Xi,empty,Board,Board1),
+    put_on_board(Yf,Xf,queen,Board1,NewBoard).
 
 
-place_cell(Board,NewBoard,Xi,Yi,Xf,Yf,Cell):-
+move_piece(Board,NewBoard,_,_,_,_,Cell):-
     write('CELULA: '),write(Cell),nl,
     write('Not a valid Cell.\n'),
     NewBoard = Board.
 
-putOnBoard(0, ElemCol, NewElem, [RowAtTheHead|RemainingRows], [NewRowAtTheHead|RemainingRows]):-
-  	putOnColumn(ElemCol, NewElem, RowAtTheHead, NewRowAtTheHead).
+put_on_board(0, ElemCol, NewElem, [RowAtTheHead|RemainingRows], [NewRowAtTheHead|RemainingRows]):-
+  	put_on_column(ElemCol, NewElem, RowAtTheHead, NewRowAtTheHead).
 
-putOnBoard(ElemRow, ElemCol, NewElem, [RowAtTheHead|RemainingRows], [RowAtTheHead|ResultRemainingRows]):-
+put_on_board(ElemRow, ElemCol, NewElem, [RowAtTheHead|RemainingRows], [RowAtTheHead|ResultRemainingRows]):-
   	ElemRow > 0,
   	ElemRow1 is ElemRow - 1,
-  	putOnBoard(ElemRow1, ElemCol, NewElem, RemainingRows, ResultRemainingRows).
+  	put_on_board(ElemRow1, ElemCol, NewElem, RemainingRows, ResultRemainingRows).
 
-putOnColumn(0, Elem, [_|L], [Elem|L]).
+put_on_column(0, Elem, [_|L], [Elem|L]).
 
-putOnColumn(I, Elem, [H|L], [H|ResL]):-
+put_on_column(I, Elem, [H|L], [H|ResL]):-
   	I > 0,
   	I1 is I - 1,
-  	putOnColumn(I1, Elem, L, ResL).
-
-verify_initial_cell([L|Ls],Xi,Yi,Xf,Yf,Cell):-
-    Yi<Yf,
-    Yi1 is Yi+1,
-    verify_initial_cell(Ls,Xi,Yi1,Xf,Yf,Cell).
-
-verify_initial_cell([],_,_,_,_,Cell):-
-    write('Fim de lista de listas, valor de Y demasiado elevado.\n').
-
-verify_initial_cell([L|Ls],Xi,Yi,Xf,Yf,Cell):-
-    Yi=Yf,
-    write('\nINTO row_cell.'),
-    verify_row_cell(L,0,Xf,Cell).
-
-verify_row_cell([E|Es],Xi,Xf,Cell):-
-    Xi<Xf,
-    Xi1 is Xi+1,
-    verify_row_cell(Es,Xi1,Xf,Cell).
-
-verify_row_cell([E|Es],Xf,Xf,Cell):-
-    Cell=E.
-
-verify_row_cell([],_,_,Cell):-
-    write('Fim da lista de elementos, valor de X demasiado grande.\n').
+  	put_on_column(I1, Elem, L, ResL).
