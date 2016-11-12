@@ -19,23 +19,36 @@ player_vs_player:-
   game_play(Board,Columns,Rows,0,0).
 
 game_play(Board,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
-  calc_divisions_points(Board,Rows,BottomPoints,TopPoints),
-  display_points_division(TopPoints,BottomPoints),
-  verify_end_game(TopPoints,BottomPoints,PlayerTopPoints,PlayerBottomPoints,Continue),
+  %verify_end_game(TopPoints,BottomPoints,PlayerTopPoints,PlayerBottomPoints,Continue),
   !,
   Continue=1,
   askPlayerCoordinates(Xi1,Yi1,Xf1,Yf1,player1),
   move(Board,Xi1,Yi1,Xf1,Yf1,NewBoard),
   display_total_board(NewBoard,Rows,Columns),
+  calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
+  display_points_division(TopPoints1,BottomPoints1),
   askPlayerCoordinates(Xi2,Yi2,Xf2,Yf2,player2),
   move(NewBoard,Xi2,Yi2,Xf2,Yf2,NewBoard1),
   display_total_board(NewBoard1,Rows,Columns),
+  calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
+  display_points_division(TopPoints2,BottomPoints2),
   game_play(NewBoard1,Columns,Rows,PlayerTopPoints,PlayerBottomPoints).
 
 /* Menu fim de jogo ----------------------------------------------------------*/
 end_menu(PlayerTopPoints,PlayerBottomPoints):-
+  PlayerTopPoints>PlayerBottomPoints,
   nl,nl,
-  write('---------------------------\n'),
-	write('-------- Game Over --------\n'),
-	write('---------------------------\n'),
+  write('---------------------------------\n'),
+	write('----------- Game Over -----------\n'),
+	write('---------------------------------\n'),
+  write('Player top won the game ! -------\n'),
 	nl.
+
+  end_menu(PlayerTopPoints,PlayerBottomPoints):-
+    PlayerBottomPoints>PlayerTopPoints,
+    nl,nl,
+    write('---------------------------------\n'),
+  	write('----------- Game Over -----------\n'),
+  	write('---------------------------------\n'),
+    write('Player bottom won the game ! ----\n'),
+  	nl.

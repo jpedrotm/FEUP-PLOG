@@ -1,8 +1,8 @@
 /* Identificar jogadores -----------------------------------------------------*/
 translate_player_name(player1,'player top').
 translate_player_name(player2,'player bottom').
-translate_player_num(player1,0).
-translate_player_num(player2,1).
+player_nr(player1,0).
+player_nr(player2,1).
 
 /* Predicados para a interação do jogo com o utlizador -----------------------*/
 
@@ -16,12 +16,25 @@ askPlayerCoordinates(Xi,Yi,Xf,Yf,Player):-
   nl,
   translate_player_num(Player,Num),
   translate_player_name(Player,Name),
+  YMin is 4*Num,
+  YMax is YMin+4,
   write('Time to play the '),write(Name),write('.'),nl,
   write('Initial X: '),
-  read(Xi),
+  receive_coordinate(Xi,0,4),
   write('Initial Y: '),
-  read(Yi),
+  receive_coordinate(Yi,YMin,YMax),
   write('Final X: '),
-  read(Xf),
+  receive_coordinate(Xf,0,4),
   write('Final Y: '),
-  read(Yf).
+  receive_coordinate(Yf,0,8).
+
+receive_coordinate(Coord,CoordMin,CoordMax):-
+  Coord=_,
+  read(Coord),
+  Coord >=CoordMin,
+  Coord<CoordMax.
+
+receive_coordinate(Coord,CoordMin,CoordMax):-
+  nl,
+  !,
+  receive_coordinate(Coord,CoordMin,CoordMax).

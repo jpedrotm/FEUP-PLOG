@@ -54,7 +54,7 @@ calc_divisions_points([L|Ls],NumLines,PlayerPoints1,PlayerPoints2):-
 
 calc_division([L|Ls],NumLines,CurrPlayerPoints1,PlayerPoints1,CurrPlayerPoints2,PlayerPoints2,CurrLine):-
     CurrLine<NumLines,
-    CurrLine>round(NumLines/2),
+    CurrLine>=round(NumLines/2),
     CurrLine1 is CurrLine+1,
     calc_value_line(L,LinePoints),
     CurrPlayerPoints11 is CurrPlayerPoints1+LinePoints,
