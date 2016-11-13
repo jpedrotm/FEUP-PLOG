@@ -27,7 +27,7 @@ game_play(Board,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
   calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
   verify_end_game(TopPoints1,BottomPoints1,NewPTPoints,PlayerBottomPoints),
   display_points_division(NewPTPoints,PlayerBottomPoints),
-  receive_coordinate(Xi2,Yi2,Xf2,Yf2,player2),
+  receive_coordinates(Xi2,Yi2,Xf2,Yf2,player2),
   move(NewBoard,Xi2,Yi2,Xf2,Yf2,NewBoard1, player2, PlayerBottomPoints, NewPBPoints),
   display_total_board(NewBoard1,Rows,Columns),
   calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
