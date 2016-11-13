@@ -88,12 +88,22 @@ display_boundary(N):-
 display_boundary(0):-nl.
 
 /*Display points of each division of the board*/
-display_points_division(PlayerTopPoints,PlayerBottomPoints):-
+display_points_division(TopPoints,BottomPoints):-
   write('Top Points: '),
-  write(PlayerTopPoints),
+  write(TopPoints),
   nl,
   write('Bottom Points: '),
-  write(PlayerBottomPoints).
+  write(BottomPoints).
+
+display_players_points(PlayerTopPoints,PlayerBottomPoints):-
+  write('Player 1 Points: '),
+  write(PlayerTopPoints),
+  nl,
+  write('Player 2 Points: '),
+  write(PlayerBottomPoints),
+  nl,
+  nl.
+
 
 /* Dispay error message*/
 display_error(Error):-

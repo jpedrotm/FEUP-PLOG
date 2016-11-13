@@ -16,6 +16,9 @@ player_vs_player:-
   nl,
   initialize_board(Board,Columns,Rows),
   display_total_board(Board,Rows,Columns),
+  calc_divisions_points(Board,Rows,BottomPoints1,TopPoints1),
+  display_players_points(0,0),
+  display_points_division(TopPoints1,BottomPoints1),
   game_play(Board,NewBoard,Columns,Rows,0,0).
 
 make_play(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,Player):-
@@ -30,11 +33,13 @@ game_play(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
     calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
     (verify_end_game(TopPoints1,BottomPoints1,NewTopPoints,PlayerBottomPoints) -> end_menu(NewTopPoints,PlayerBottomPoints);
     (
-    display_points_division(NewTopPoints,PlayerBottomPoints),
+    display_players_points(NewTopPoints,PlayerBottomPoints),
+    display_points_division(TopPoints1,BottomPoints1),
     make_play(NewBoard,NewBoard1,Columns,Rows,PlayerBottomPoints,NewBottomPoints,player2),
     calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
     (verify_end_game(TopPoints2,BottomPoints2,NewBottomPoints,PlayerTopPoints) -> end_menu(NewTopPoints,NewBottomPoints);
-    (display_points_division(NewTopPoints,NewBottomPoints),
+    (display_players_points(NewTopPoints,NewBottomPoints),
+    display_points_division(TopPoints2,BottomPoints2),
     game_play(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints))))).
 
 
@@ -46,7 +51,6 @@ player_vs_cpu:-
 
 make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU):-
   cpu_coordinates(Xi1,Yi1,Xf1,Yf1,CPU),
-  write('Xi1: '),write(Xi1),write('Yi1: '),write(Yi1),write('Xf1: '),write(Xf1),write('Yf1: '),write(Yf1),nl,
   !,
   (move(Board,Xi1,Yi1,Xf1,Yf1,NewBoard, CPU, ActivePlayerPoints, NewPoints) ->
   (display_total_board(NewBoard,Rows,Columns));
@@ -58,12 +62,32 @@ game_play_wih_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints
   calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
   (verify_end_game(TopPoints1,BottomPoints1,NewTopPoints,PlayerBottomPoints) -> end_menu(NewTopPoints,PlayerBottomPoints);
   (
+  display_players_points(NewTopPoints,PlayerBottomPoints),
   display_points_division(NewTopPoints,PlayerBottomPoints),
   make_play(NewBoard,NewBoard1,Columns,Rows,PlayerBottomPoints,NewBottomPoints,player2),
   calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
   (verify_end_game(TopPoints2,BottomPoints2,NewBottomPoints,PlayerTopPoints) -> end_menu(NewTopPoints,NewBottomPoints);
-  (display_points_division(NewTopPoints,NewBottomPoints),
+  (display_players_points(NewTopPoints,NewBottomPoints),
+  display_points_division(NewTopPoints,NewBottomPoints),
   game_play_wih_cpu(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints))))).
+
+cpu_vs_cpu:-
+  nl,
+  initialize_board(Board,Columns,Rows),
+  display_total_board(Board,Rows,Columns),
+  game_play_wih_cpu_vs_cpu(Board,NewBoard,Columns,Rows,0,0).
+
+game_play_wih_cpu_vs_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
+  make_play_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,NewTopPoints,player1),
+  calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
+  (verify_end_game(TopPoints1,BottomPoints1,NewTopPoints,PlayerBottomPoints) -> end_menu(NewTopPoints,PlayerBottomPoints);
+  (
+  display_points_division(NewTopPoints,PlayerBottomPoints),
+  make_play_cpu(NewBoard,NewBoard1,Columns,Rows,PlayerBottomPoints,NewBottomPoints,player2),
+  calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
+  (verify_end_game(TopPoints2,BottomPoints2,NewBottomPoints,PlayerTopPoints) -> end_menu(NewTopPoints,NewBottomPoints);
+  (display_points_division(NewTopPoints,NewBottomPoints),
+  game_play_wih_cpu_vs_cpu(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints))))).
 
 
 
@@ -75,7 +99,11 @@ end_menu(PlayerTopPoints,PlayerBottomPoints):-
 	write('----------- Game Over ------------\n'),
 	write('----------------------------------\n'),
   write('--- Player top won the game ! ----\n'),
-	nl.
+  write('--- Player Top Points: '),write(PlayerTopPoints),
+  nl,
+  write('--- Player Bottom Points: '),write(PlayerBottomPoints),
+	nl,
+  nl.
 
   end_menu(PlayerTopPoints,PlayerBottomPoints):-
     nl,nl,
@@ -83,4 +111,8 @@ end_menu(PlayerTopPoints,PlayerBottomPoints):-
   	write('----------- Game Over ------------\n'),
   	write('----------------------------------\n'),
     write('---Player bottom won the game ! --\n'),
-  	nl.
+    write('--- Player Top Points: '),write(PlayerTopPoints),write(' ---------\n'),
+    write('--- Player Bottom Points: '),write(PlayerBottomPoints),write(' ------\n'),
+    write('----------------------------------\n'),
+    nl,
+    initial_menu.
