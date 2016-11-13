@@ -24,36 +24,37 @@ receive_coordinates(Xi,Yi,Xf,Yf,Player):-
   receive_coordinate(Xf,0,4,'Final X: '),
   receive_coordinate(Yf,0,8,'Final Y: ').
 
-cpu_coordinates(Xi,Yi,Xf,Yf,CPU):-
+cpu_coordinates(Board,CPU,Xi,Yi,Xf,Yf,1):-
   nl,
-  player_nr(CPU,Num),
-  translate_player_name(CPU,Name),
-  YMin is 4*Num,
-  YMax is YMin+4,
-  cpu_coordinate(Xi,0,4),
-  write('| '),write(Xi),
-  cpu_coordinate(Yi,YMin,YMax),
-  write(Yi),
-  cpu_coordinate(Xf,0,4),
-  write(Xf),
-  cpu_coordinate(Yf,0,8),
-  write(Yf),write(' | '),nl.
+  %player_nr(CPU,Num),
+  %translate_player_name(CPU,Name),
+  valid_moves(Board, CPU, Moves),
+  list_size(Moves, NoMoves),
+  random(0, NoMoves, MoveIndex),
+  nth0(MoveIndex, Moves, Move),
+  nth0(0, Move, Xi),
+  nth0(1, Move, Yi),
+  nth0(2, Move, Xf),
+  nth0(3, Move, Yf),
+  write('| '),write(Xi), nl,
+  write(Yi), nl,
+  write(Xf), nl,
+  write(Yf),write(' | '), nl.
 
-cpu_coordinate(Coord,CoordMin,CoordMax):-
-  Coord=_,
-  random(CoordMin,CoordMax,Coord),
-  Coord >=CoordMin,
-  Coord<CoordMax.
-
-cpu_coordinate(Coord,CoordMin,CoordMax):-
+cpu_coordinates(Board,CPU,Xi,Yi,Xf,Yf,2):-
   nl,
-  !,
-  cpu_coordinate(Coord,CoordMin,CoordMax).
-
-
-
-
-
+  % player_nr(CPU,Num),
+  % translate_player_name(CPU,Name),
+  valid_moves(Board, CPU, Moves),
+  get_best_move(Board, CPU, Moves, Move),
+  nth0(0, Move, Xi),
+  nth0(1, Move, Yi),
+  nth0(2, Move, Xf),
+  nth0(3, Move, Yf),
+  write('Chosen Move: Xi='),write(Xi), write(', Yi='),
+  write(Yi), nl,
+  write('             Xf='),write(Xf), write(', Yf='),
+  write(Yf), nl.
 
 
 receive_coordinate(Coord,CoordMin,CoordMax,Line):-
