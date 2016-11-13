@@ -111,7 +111,7 @@ verify_empty_path(Board, Xi, Yi, Xf, Yf):-          % Diagonal Movement %
     Yf1 is Yf - YInc,
     verify_empty_path(Board, Xi, Yi, Xf1, Yf1, XInc, YInc).
 
-verify_empty_path(Board, Xf, Yf, Xf, Yf, _, _).
+verify_empty_path(_, Xf, Yf, Xf, Yf, _, _).
 
 verify_empty_path(Board, Xi, Yi, Xf, Yf, XInc, YInc):-
     X1 is Xi + XInc,
@@ -255,31 +255,7 @@ put_on_column(I, Elem, [H|L], [H|ResL]):-
   	I1 is I - 1,
   	put_on_column(I1, Elem, L, ResL).
 
-verify_initial_cell([L|Ls],Xi,Yi,Xf,Yf,Cell):-
-    Yi<Yf,
-    Yi1 is Yi+1,
-    verify_initial_cell(Ls,Xi,Yi1,Xf,Yf,Cell).
-
-verify_initial_cell([],_,_,_,_,Cell):-
-    write('Fim de lista de listas, valor de Y demasiado elevado.\n').
-
-verify_initial_cell([L|Ls],Xi,Yi,Xf,Yf,Cell):-
-    Yi=Yf,
-    write('\nINTO row_cell.'),
-    verify_row_cell(L,0,Xf,Cell).
-
-verify_row_cell([E|Es],Xi,Xf,Cell):-
-    Xi<Xf,
-    Xi1 is Xi+1,
-    verify_row_cell(Es,Xi1,Xf,Cell).
-
-verify_row_cell([E|Es],Xf,Xf,Cell):-
-    Cell=E.
-
-verify_row_cell([],_,_,Cell):-
-    write('Fim da lista de elementos, valor de X demasiado grande.\n').
-
 /* Predicado para verificação do termino do jogo------------------------------*/
-verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints).
+verify_end_game(0,_,_,_).
 
-verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints).
+verify_end_game(_,0,_,_).

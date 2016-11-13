@@ -1,6 +1,6 @@
 is_valid_movement(Board, Xi, Yi, Xf, Yf, Piece, Player):-
     verify_empty_path(Board, Xi, Yi, Xf, Yf),
-    check_post_movement_events(Board, Xf, Yf, Player, 0, X, Piece, NewPiece).
+    check_post_movement_events(Board, Xf, Yf, Player, 0, _, Piece, _).
 
 add_valid_movement(Board, Xi, Yi, XInc, YInc, Piece, Player, Movs, [[Xi, Yi, Xf, Yf] | Movs]):-
     Xf is Xi + XInc,
@@ -25,6 +25,17 @@ valid_movements(Board, Xi, Yi, drone, Player, Movs, NewMovs):-
     add_valid_movement(Board, Xi, Yi, 2, 0, pawn, Player, Movs5, Movs6),
     add_valid_movement(Board, Xi, Yi, 0, -2, pawn, Player, Movs6, Movs7),
     add_valid_movement(Board, Xi, Yi, -2, 0, pawn, Player, Movs7, NewMovs).
+
+valid_movements(Board, Xi, Yi, queen, Player, Movs, NewMovs):-
+    queen_even_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs, Movs1, 1, 1),
+    queen_even_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs1, Movs2, -1, -1),
+    queen_odd_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs2, Movs3, 1, 1),
+    queen_odd_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs3, Movs4, -1, -1),
+    queen_vertical_movements(Board, Xi, Yi, queen, Player, Movs4, Movs5, 1, 1),
+    queen_vertical_movements(Board, Xi, Yi, queen, Player, Movs5, Movs6, -1, -1),
+    queen_horizontal_movements(Board, Xi, Yi, queen, Player, Movs6, Movs7, 1, 1),
+    queen_horizontal_movements(Board, Xi, Yi, queen, Player, Movs7, Movs8, -1, -1),
+    NewMovs = Movs8.
 
 queen_odd_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs, NewMovs, N, NInc):-
     Xf is Xi + N,
@@ -73,17 +84,6 @@ queen_horizontal_movements(Board, Xi, Yi, queen, Player, Movs, NewMovs, N, NInc)
 
 queen_horizontal_movements(_, _, _, _, _, Movs, Movs, _, _).
 
-valid_movements(Board, Xi, Yi, queen, Player, Movs, NewMovs):-
-    queen_even_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs, Movs1, 1, 1),
-    queen_even_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs1, Movs2, -1, -1),
-    queen_odd_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs2, Movs3, 1, 1),
-    queen_odd_quadrant_diagonal_movements(Board, Xi, Yi, queen, Player, Movs3, Movs4, -1, -1),
-    queen_vertical_movements(Board, Xi, Yi, queen, Player, Movs4, Movs5, 1, 1),
-    queen_vertical_movements(Board, Xi, Yi, queen, Player, Movs5, Movs6, -1, -1),
-    queen_horizontal_movements(Board, Xi, Yi, queen, Player, Movs6, Movs7, 1, 1),
-    queen_horizontal_movements(Board, Xi, Yi, queen, Player, Movs7, Movs8, -1, -1),
-    NewMovs = Movs8.
-
 valid_movements_on_board_half(Board, Player, PlayerNr, Moves, NewMoves):-
     Line1 is 4 * PlayerNr,
     Line2 is 1 + 4 * PlayerNr,
@@ -94,7 +94,7 @@ valid_movements_on_board_half(Board, Player, PlayerNr, Moves, NewMoves):-
     valid_movements_on_line(Board, Player, PlayerNr, Moves2, Moves3, Line3, 0),
     valid_movements_on_line(Board, Player, PlayerNr, Moves3, NewMoves, Line4, 0).
 
-valid_movements_on_line(Board, Player, PlayerNr, Moves, Moves, Yi, 8).
+valid_movements_on_line(_, _, _, Moves, Moves, _, 8).
 
 valid_movements_on_line(Board, Player, PlayerNr, Moves, NewMoves, Yi, Xi):-
     get_board_element(Board, Xi, Yi, Elem),
@@ -134,15 +134,15 @@ move_value(Board, Player, Move, Value):-
 
 move_value(_, _, _, 0).
 
-list_size([L|Ls], Size):-
+list_size([_|Ls], Size):-
   list_size(Ls, Size1),
   Size is Size1 + 1.
 list_size([], 0).
 
-get_move_with_value(Board, Player, [Move|Rest], Value, Move):-
+get_move_with_value(Board, Player, [Move|_], Value, Move):-
     move_value(Board, Player, Move, Value).
 
-get_move_with_value(Board, Player, [Head|Rest], Value, Move):-
+get_move_with_value(Board, Player, [_|Rest], Value, Move):-
     get_move_with_value(Board, Player, Rest, Value, Move).
 
 get_best_move(Board, Player, Moves, Move):-
@@ -154,7 +154,7 @@ get_best_move(Board, Player, Moves, Move):-
 get_best_move(Board, Player, Moves, Move):-
     get_move_with_value(Board, Player, Moves, 1, Move).
 
-get_best_move(Board, Player, Moves, Move):-
+get_best_move(_, _, Moves, Move):-
     list_size(Moves, NoMoves),
     random(0, NoMoves, ChosenMoveIndex),
     nth0(ChosenMoveIndex, Moves, Move).

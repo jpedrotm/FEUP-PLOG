@@ -32,7 +32,7 @@ display_board([L|Ls],Rows,Columns,I):-
   display_line_elems(L,I),
   nl,
   display_board(Ls,Rows,Columns,I1).
-display_board([],Rows,Columns,I):-
+display_board([],_,Columns,_):-
   NumberCols is Columns*5,
   display_horizontal(NumberCols).
 
