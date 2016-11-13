@@ -47,18 +47,19 @@ player_vs_cpu:-
   nl,
   initialize_board(Board,Columns,Rows),
   display_total_board(Board,Rows,Columns),
-  game_play_wih_cpu(Board,NewBoard,Columns,Rows,0,0).
+  receive_bot_level(BotLevel),
+  game_play_wih_cpu(Board,NewBoard,Columns,Rows,0,0, BotLevel).
 
-make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU):-
-  cpu_coordinates(Board,CPU,Xi1,Yi1,Xf1,Yf1,2),
+make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU, BotLevel):-
+  cpu_coordinates(Board,CPU,Xi1,Yi1,Xf1,Yf1,BotLevel),
   !,
   (move(Board,Xi1,Yi1,Xf1,Yf1,NewBoard, CPU, ActivePlayerPoints, NewPoints) ->
   (display_total_board(NewBoard,Rows,Columns));
   make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU)).
 
 
-game_play_wih_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
-  make_play_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,NewTopPoints,player1),
+game_play_wih_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints, BotLevel):-
+  make_play_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,NewTopPoints,player1, BotLevel),
   calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
   (verify_end_game(TopPoints1,BottomPoints1,NewTopPoints,PlayerBottomPoints) -> end_menu(NewTopPoints,PlayerBottomPoints);
   (
@@ -69,27 +70,29 @@ game_play_wih_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints
   (verify_end_game(TopPoints2,BottomPoints2,NewBottomPoints,PlayerTopPoints) -> end_menu(NewTopPoints,NewBottomPoints);
   (display_players_points(NewTopPoints,NewBottomPoints),
   display_points_division(NewTopPoints,NewBottomPoints),
-  game_play_wih_cpu(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints))))).
+  game_play_wih_cpu(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints, BotLevel))))).
 
 cpu_vs_cpu:-
   nl,
   initialize_board(Board,Columns,Rows),
   display_total_board(Board,Rows,Columns),
+  receive_bot_level(BotLevel1),
+  receive_bot_level(BotLevel2),
   game_play_wih_cpu_vs_cpu(Board,NewBoard,Columns,Rows,0,0).
 
-game_play_wih_cpu_vs_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints):-
-  make_play_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,NewTopPoints,player1),
+game_play_wih_cpu_vs_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints,BotLevel1):-
+  make_play_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,NewTopPoints,player1,BotLevel1),
   calc_divisions_points(NewBoard,Rows,BottomPoints1,TopPoints1),
   (verify_end_game(TopPoints1,BottomPoints1,NewTopPoints,PlayerBottomPoints) -> end_menu(NewTopPoints,PlayerBottomPoints);
   (
   display_points_division(NewTopPoints,PlayerBottomPoints),
   get_char(_),
-  make_play_cpu(NewBoard,NewBoard1,Columns,Rows,PlayerBottomPoints,NewBottomPoints,player2),
+  make_play_cpu(NewBoard,NewBoard1,Columns,Rows,PlayerBottomPoints,NewBottomPoints,player2,BotLevel2),
   calc_divisions_points(NewBoard1,Rows,BottomPoints2,TopPoints2),
   (verify_end_game(TopPoints2,BottomPoints2,NewBottomPoints,PlayerTopPoints) -> end_menu(NewTopPoints,NewBottomPoints);
   (display_points_division(NewTopPoints,NewBottomPoints),
   get_char(_),
-  game_play_wih_cpu_vs_cpu(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints))))).
+  game_play_wih_cpu_vs_cpu(NewBoard1,NewBoard2,Columns,Rows,NewTopPoints,NewBottomPoints,BotLevel1,BotLevel2))))).
 
 
 

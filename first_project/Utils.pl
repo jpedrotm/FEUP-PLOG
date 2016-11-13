@@ -24,6 +24,9 @@ receive_coordinates(Xi,Yi,Xf,Yf,Player):-
   receive_coordinate(Xf,0,4,'Final X: '),
   receive_coordinate(Yf,0,8,'Final Y: ').
 
+receive_bot_level(BotLevel):-
+  receive_coordinate(BotLevel, 1, 3, 'Bot Level (1 - Dumb, 2 - Smart)').
+
 cpu_coordinates(Board,CPU,Xi,Yi,Xf,Yf,1):-
   nl,
   %player_nr(CPU,Num),
