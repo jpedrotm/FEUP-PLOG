@@ -1,4 +1,5 @@
 :-use_module(library(lists)).
+:-use_module(library(random)).
 :-include('Logic.pl').
 :-include('Interface.pl').
 :-include('Utils.pl').

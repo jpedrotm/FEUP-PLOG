@@ -24,6 +24,38 @@ receive_coordinates(Xi,Yi,Xf,Yf,Player):-
   receive_coordinate(Xf,0,4,'Final X: '),
   receive_coordinate(Yf,0,8,'Final Y: ').
 
+cpu_coordinates(Xi,Yi,Xf,Yf,CPU):-
+  nl,
+  player_nr(CPU,Num),
+  translate_player_name(CPU,Name),
+  YMin is 4*Num,
+  YMax is YMin+4,
+  cpu_coordinate(Xi,0,4),
+  write('| '),write(Xi),
+  cpu_coordinate(Yi,YMin,YMax),
+  write(Yi),
+  cpu_coordinate(Xf,0,4),
+  write(Xf),
+  cpu_coordinate(Yf,0,8),
+  write(Yf),write(' | '),nl.
+
+cpu_coordinate(Coord,CoordMin,CoordMax):-
+  Coord=_,
+  random(CoordMin,CoordMax,Coord),
+  Coord >=CoordMin,
+  Coord<CoordMax.
+
+cpu_coordinate(Coord,CoordMin,CoordMax):-
+  nl,
+  !,
+  cpu_coordinate(Coord,CoordMin,CoordMax).
+
+
+
+
+
+
+
 receive_coordinate(Coord,CoordMin,CoordMax,Line):-
   Coord=_,
   write(Line),

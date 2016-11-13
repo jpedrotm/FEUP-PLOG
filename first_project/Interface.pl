@@ -94,3 +94,10 @@ display_points_division(PlayerTopPoints,PlayerBottomPoints):-
   nl,
   write('Bottom Points: '),
   write(PlayerBottomPoints).
+
+/* Dispay error message*/
+display_error(Error):-
+  write('---------------------------\n'),
+	write('---------- ERROR ----------\n'),
+	write('---------------------------\n'),
+  write(Error),nl,nl.

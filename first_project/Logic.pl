@@ -5,30 +5,19 @@
   piece_simbol(pawn,'+').
   piece_simbol(empty,' ').
 
-  player_nr(player1, 0).
-  player_nr(player2, 1).
-
   /*Predicados para inicializar um tabuleiro de forma estática-----------------------------------------------------------------------------------------------------------------------------*/
 
   initialize_board(Board,Columns,Rows):-
     Columns is 4,
     Rows is 8,
-    % Board=[[queen,queen,drone,empty],
-    %        [queen,drone,pawn,empty],
-    %        [drone,pawn,pawn,empty],
-    %        [empty,empty,empty,empty],
-    %        [empty,empty,empty,empty],
-    %        [empty,pawn,pawn,drone],
-    %        [empty,pawn,drone,queen],
-    %        [empty,drone,queen,queen]].
-    Board=[[empty,empty,empty,empty],
-           [empty,pawn,empty,empty],
-           [empty,empty,empty,empty],
-           [empty,empty,empty,empty],
-           [empty,empty,drone,empty],
-           [empty,pawn,empty,empty],
-           [empty,empty,empty,empty],
-           [empty,empty,empty,empty]].
+    Board=[[queen,queen,drone,empty],
+            [queen,drone,pawn,empty],
+            [drone,pawn,pawn,empty],
+            [empty,empty,empty,empty],
+            [empty,empty,empty,empty],
+            [empty,pawn,pawn,drone],
+            [empty,pawn,drone,queen],
+            [empty,drone,queen,queen]].
 
 
 /*Predicados responsáveis por gerar o tabuleiro vazio de forma dinámica-------------------------------------------------------------------------------------------------------------------*/
@@ -292,11 +281,7 @@ verify_row_cell([],_,_,Cell):-
 
 /* Predicado para verificação do termino do jogo------------------------------*/
 verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints):-
-  write('ESTOU'),!,
-  end_menu(PlayerTopPoints,PlayerBottomPoints).
+  write('ESTOU').
 
 verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints):-
-  write('ESTOU'),!,
-  end_menu(PlayerTopPoints,PlayerBottomPoints).
-
-verify_end_game(_,_,_,_):-!.
+  write('ESTOU').
