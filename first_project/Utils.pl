@@ -12,29 +12,26 @@ askMenuOption(Option):-
   !,
   read(Option).
 
-askPlayerCoordinates(Xi,Yi,Xf,Yf,Player):-
+receive_coordinates(Xi,Yi,Xf,Yf,Player):-
   nl,
   player_nr(Player,Num),
   translate_player_name(Player,Name),
   YMin is 4*Num,
   YMax is YMin+4,
   write('Time to play the '),write(Name),write('.'),nl,
-  write('Initial X: '),
-  receive_coordinate(Xi,0,4),
-  write('Initial Y: '),
-  receive_coordinate(Yi,YMin,YMax),
-  write('Final X: '),
-  receive_coordinate(Xf,0,4),
-  write('Final Y: '),
-  receive_coordinate(Yf,0,8).
+  receive_coordinate(Xi,0,4,'Initial X: '),
+  receive_coordinate(Yi,YMin,YMax,'Initial Y: '),
+  receive_coordinate(Xf,0,4,'Final X: '),
+  receive_coordinate(Yf,0,8,'Final Y: ').
 
-receive_coordinate(Coord,CoordMin,CoordMax):-
+receive_coordinate(Coord,CoordMin,CoordMax,Line):-
   Coord=_,
+  write(Line),
   read(Coord),
   Coord >=CoordMin,
   Coord<CoordMax.
 
-receive_coordinate(Coord,CoordMin,CoordMax):-
+receive_coordinate(Coord,CoordMin,CoordMax,Line):-
   nl,
   !,
-  receive_coordinate(Coord,CoordMin,CoordMax).
+  receive_coordinate(Coord,CoordMin,CoordMax,Line).

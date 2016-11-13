@@ -14,8 +14,8 @@
     Columns is 4,
     Rows is 8,
     Board=[[queen,queen,drone,empty],
-           [empty,empty,empty,empty],
-           [empty,empty,empty,empty],
+           [queen,drone,pawn,empty],
+           [drone,pawn,pawn,empty],
            [empty,empty,empty,empty],
            [empty,empty,empty,empty],
            [empty,pawn,pawn,drone],
@@ -87,9 +87,9 @@ get_board_element(Board, X, Y, Elem):-
 move(Board,Xi,Yi,Xf,Yf,NewBoard,Player,NrPoints,NewPoints):-
     % Para o caso da a célula para onde quer mexer a peça estar para trás da célula
     get_board_element(Board, Xf, Yf, FinalCell),
-    write('Final Cell: '), write(FinalCell),nl,
+    write('Final Cell: '), write(FinalCell), nl,
     get_board_element(Board,Xi,Yi,InitialCell),
-    write('Initial Cell: '),write(InitialCell),nl,
+    write('Initial Cell: '),write(InitialCell),nl,!,
     move_piece(Board,NewBoard,Xi,Yi,Xf,Yf,InitialCell,Player,NrPoints,NewPoints).
 
 verify_empty_path(Board, Xi, Yf, Xf, Yf):-          % Horizontal Movement %
@@ -277,17 +277,12 @@ verify_row_cell([],_,_,Cell):-
     write('Fim da lista de elementos, valor de X demasiado grande.\n').
 
 /* Predicado para verificação do termino do jogo------------------------------*/
-verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints,Continue):-
-  Continue is 0,
+verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints):-
+  write('ESTOU'),!,
   end_menu(PlayerTopPoints,PlayerBottomPoints).
 
-verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints,Continue):-
-  Continue is 0,
+verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints):-
+  write('ESTOU'),!,
   end_menu(PlayerTopPoints,PlayerBottomPoints).
 
-verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints,Continue):-
-  Continue is 0,
-  end_menu(PlayerTopPoints,PlayerBottomPoints).
-
-verify_end_game(_,_,_,_,Continue):-
-  Continue is 1.
+verify_end_game(_,_,_,_):-!.
