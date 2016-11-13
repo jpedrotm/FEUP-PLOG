@@ -161,9 +161,9 @@ check_post_movement_events(Board, Xf, Yf, Player, NrPoints, NrPoints, drone, New
     \+exists_on_board_half(Board, Player, queen),
     NewPiece = queen.
 
-check_post_movement_events(_, _, _, _, _, _, _, _):-
-    nl, write('Invalid movement'), nl,
-    fail.
+% check_post_movement_events(_, _, _, _, _, _, _, _):-
+%     nl, write('Invalid movement'), nl,
+%     fail.
 
 
 exists_on_line([Piece|_], Piece).
@@ -280,8 +280,6 @@ verify_row_cell([],_,_,Cell):-
     write('Fim da lista de elementos, valor de X demasiado grande.\n').
 
 /* Predicado para verificação do termino do jogo------------------------------*/
-verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints):-
-  write('ESTOU').
+verify_end_game(0,_,PlayerTopPoints,PlayerBottomPoints).
 
-verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints):-
-  write('ESTOU').
+verify_end_game(_,0,PlayerTopPoints,PlayerBottomPoints).
