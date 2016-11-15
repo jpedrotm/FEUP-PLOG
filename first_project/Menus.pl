@@ -55,7 +55,7 @@ make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU, BotL
   !,
   (move(Board,Xi1,Yi1,Xf1,Yf1,NewBoard, CPU, ActivePlayerPoints, NewPoints) ->
   (display_total_board(NewBoard,Rows,Columns));
-  make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU)).
+  make_play_cpu(Board,NewBoard,Columns,Rows,ActivePlayerPoints,NewPoints,CPU, BotLevel)).
 
 
 game_play_wih_cpu(Board,NewBoard,Columns,Rows,PlayerTopPoints,PlayerBottomPoints, BotLevel):-
@@ -108,7 +108,7 @@ end_menu(PlayerTopPoints,PlayerBottomPoints):-
   nl,
   write('--- Player Bottom Points: '),write(PlayerBottomPoints),
 	nl,
-  nl.
+  initial_menu.
 
   end_menu(PlayerTopPoints,PlayerBottomPoints):-
     nl,nl,

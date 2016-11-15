@@ -1,8 +1,8 @@
 /* Identificar jogadores -----------------------------------------------------*/
 translate_player_name(player1,'player top').
 translate_player_name(player2,'player bottom').
-% player_nr(player1,0).
-% player_nr(player2,1).
+player_nr(player1,0).
+player_nr(player2,1).
 
 /* Predicados para a interação do jogo com o utlizador -----------------------*/
 
