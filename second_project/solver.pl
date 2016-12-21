@@ -14,26 +14,26 @@
 % [-1,-1,8,-1,-1,-1,-1,-1,-1,-1,-1,6],
 % [-1,-1,-1,-1,-1,-1,-1,-1,13,-1,-1,-1]
 
- % Board:- [5-1-10,
- %          1-2-2,
- %          7-2-5,
- %          3-3-6,
- %          11-3-7,
- %          12-4-12,
- %          4-5-9,
- %          11-5-1,
- %          9-6-7,
- %          2-7-4,
- %          8-7-8,
- %          1-8-9,
- %          5-8-1,
- %          11-8-4,
- %          2-9-5,
- %          7-10-6,
- %          10-10-1,
- %          3-11-8,
- %          12-11-8,
- %          9-12-13]
+ get_board([5-1-10,
+          1-2-2,
+          7-2-5,
+          3-3-6,
+          11-3-7,
+          12-4-12,
+          4-5-9,
+          11-5-1,
+          9-6-7,
+          2-7-4,
+          8-7-8,
+          1-8-9,
+          5-8-1,
+          11-8-4,
+          2-9-5,
+          7-10-6,
+          10-10-1,
+          3-11-8,
+          12-11-8,
+          9-12-13]).
 
 force_solution_size([S|Ss],N,NoIndexes):-
   length(S,N),
@@ -102,7 +102,10 @@ make_no_appearances(Solution, LineNr, ColNr, Representation, NoAppearances):-
   count(Representation, Col, #=, ColAppearances),
   force_adjacency(Line, ColNr, Representation),
   force_adjacency(Col, LineNr, Representation),
-  LineAppearances #= NoAppearances+2-ColAppearances.
+  TotalAppearances is NoAppearances+1,
+  LineAppearances #= TotalAppearances+1-ColAppearances, %+1 because the line and column have the element repeated
+  flatten(Solution, Flattened),
+  count(Representation, Flattened, #=, TotalAppearances). % make the nr of appearances on other lines and columns 0
 
 go_through_board([], _, _, _).
 go_through_board([Head|Rest], Result, Size, Representation):-
