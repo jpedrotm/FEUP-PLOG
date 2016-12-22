@@ -78,6 +78,38 @@ matrix_to_list([M|Ms],CurrList,FinalList):-
 
 matrix_to_list([],FinalList,FinalList).
 
+display_board([L|Ls],N):-
+  display_line_board(L),
+  write('|'),
+  nl,
+  write('   '),
+  display_boundary(N),
+  nl,
+  display_board(Ls,N).
+
+display_board([],_).
+
+display_boundary(0).
+
+display_boundary(N):-
+  format('~t~p~4|',['-----']),
+  N1 is N-1,
+  display_boundary(N1).
+
+display_line_board([E|Es]):-
+  format('~t~p~4|~t~d~t~4+',['|',E]),
+  display_line_board(Es).
+
+display_line_board([]).
+
+display_board(Board):-
+  nl,
+  length(Board,N),
+  write('   '),
+  display_boundary(N),
+  nl,
+  display_board(Board,N).
+
 force_adjacency(Line, InitialNr, Rep):-
   force_adjacency(Line, InitialNr, Rep, 1).
 
