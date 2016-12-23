@@ -1,7 +1,7 @@
 :-use_module(library(clpfd)).
 :-use_module(library(lists)).
 
-board:- [[-1,-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1],
+board([[-1,-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1],
  [2,-1,-1,-1,-1,-1,5,-1,-1,-1,-1,-1],
  [-1,-1,6,-1,-1,-1,-1,-1,-1,-1,7,-1],
  [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12],
@@ -12,7 +12,7 @@ board:- [[-1,-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1],
  [-1,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
  [-1,-1,-1,-1,-1,-1,6,-1,-1,1,-1,-1],
  [-1,-1,8,-1,-1,-1,-1,-1,-1,-1,-1,6],
- [-1,-1,-1,-1,-1,-1,-1,-1,13,-1,-1,-1]].
+ [-1,-1,-1,-1,-1,-1,-1,-1,13,-1,-1,-1]]).
 
  get_board([5-1-10,
           1-2-2,
@@ -57,11 +57,55 @@ get_line_points([Head|Tail], LineNr, ColNr, [ColNr-LineNr-Head|Rest]):-
   NextColNr is ColNr + 1,
   get_line_points(Tail, LineNr, NextColNr, Rest).
 
-force_solution_size([S|Ss],N,NoIndexes):-
+get_points_in_line(Points,LineNr,List):-
+  get_points_in_line(Points,LineNr,1,List).
+get_points_in_line([],_,_,[]).
+get_points_in_line([_-LineNr-_|Rest],LineNr,Index,[Index|List]):-
+    NextIndex is Index+1,
+    get_points_in_line(Rest,LineNr,NextIndex,List).
+get_points_in_line([_|Rest],LineNr,Index,List):-
+  NextIndex is Index+1,
+  get_points_in_line(Rest,LineNr,NextIndex,List).
+
+get_points_in_col(Points,ColNr,List):-
+  get_points_in_col(Points,ColNr,1,List).
+get_points_in_col([],_,_,[]).
+get_points_in_col([ColNr-_-_|Rest],ColNr,Index,[Index|List]):-
+    NextIndex is Index+1,
+    get_points_in_col(Rest,ColNr,NextIndex,List).
+get_points_in_col([_|Rest],ColNr,Index,List):-
+  NextIndex is Index+1,
+  get_points_in_col(Rest,ColNr,NextIndex,List).
+
+get_point_domain(Points, LineNr, ColNr, List):-
+  get_points_in_line(Points,LineNr,LinePoints),
+  get_points_in_col(Points,ColNr,ColPoints),
+  append(LinePoints, ColPoints, List).
+
+create_domains(Points,Solution):-
+  create_domains(Points,Solution,1).
+
+create_line_domains(Points,Line,LineNr):-
+  create_line_domains(Points,Line,LineNr,1).
+
+create_line_domains(_,[],_,_).
+create_line_domains(Points,[Elem|Rest],LineNr,ColNr):-
+  get_point_domain(Points,LineNr,ColNr,Domain),
+  list_to_fdset(Domain,FDSet),
+  Elem in_set FDSet,
+  NextColNr is ColNr + 1,
+  create_line_domains(Points,Rest,LineNr,NextColNr).
+
+create_domains(_,[],_).
+create_domains(Points,[SolutionHead|SolutionTail],LineNr):-
+  create_line_domains(Points,SolutionHead,LineNr),
+  NextLineNr is LineNr + 1,
+  create_domains(Points,SolutionTail,NextLineNr).
+
+force_solution_size([S|Ss],N):-
   length(S,N),
-  domain(S,0,NoIndexes),
-  force_solution_size(Ss, N,NoIndexes).
-force_solution_size([],_,_).
+  force_solution_size(Ss, N).
+force_solution_size([],_).
 
 get_line(List, LineNr, Line):-
   get_line(List, LineNr, 1, Line).
@@ -114,6 +158,10 @@ force_adjacency(Line, InitialNr, Rep):-
   force_adjacency(Line, InitialNr, Rep, 1).
 
 force_adjacency(Line, InitialNr, Representation, Pos):-
+  length(Line, N),
+  Pos > N.
+
+force_adjacency(Line, InitialNr, Representation, Pos):-
   Pos < InitialNr,
   NextPos is Pos + 1,
   element(Pos, Line, Elem),
@@ -138,10 +186,6 @@ force_adjacency(Line,InitialNr,Representation,InitialNr):-
   NextPos is InitialNr + 1,
   force_adjacency(Line, InitialNr, Representation, NextPos).
 
-force_adjacency(Line, InitialNr, Representation, Pos):-
-  length(Line, N),
-  Pos > N.
-
 make_no_appearances(Solution, LineNr, ColNr, Representation, NoAppearances):-
   get_line(Solution, LineNr, Line),
   transpose(Solution, Transposed),
@@ -164,11 +208,13 @@ go_through_board([Head|Rest], Result, Size, Representation):-
   go_through_board(Rest, Result, Size, Representation1).
 
 % receives a list of : X-Y-Nr, where nr is the number of blocks we want that block to expand to
-solve_prob(Points, N, Result):-
+solve_prob(Board, Result):-
+  length(Board, N),
   length(Result, N),
-  length(Points, NoIndexes),
-  force_solution_size(Result, N, NoIndexes),
+  get_board_points(Board,Points),
+  force_solution_size(Result, N),
+  create_domains(Points,Result),
   go_through_board(Points, Result, N, 1),
   matrix_to_list(Result,[],FlatResult),
-  labeling([], FlatResult),
-  fd_statistics.
+  labeling([ffc], FlatResult),
+  display_board(Result).
