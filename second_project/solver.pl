@@ -1,18 +1,36 @@
 :-use_module(library(clpfd)).
 :-use_module(library(lists)).
 
-board([[-1,-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1],
- [2,-1,-1,-1,-1,-1,5,-1,-1,-1,-1,-1],
- [-1,-1,6,-1,-1,-1,-1,-1,-1,-1,7,-1],
- [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12],
- [-1,-1,-1,9,-1,-1,-1,-1,-1,-1,1,-1],
- [-1,-1,-1,-1,-1,-1,-1,-1,7,-1,-1,-1],
- [-1,4,-1,-1,-1,-1,-1,8,-1,-1,-1,-1],
- [9,-1,-1,-1,1,-1,-1,-1,-1,-1,4,-1],
- [-1,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
- [-1,-1,-1,-1,-1,-1,6,-1,-1,1,-1,-1],
- [-1,-1,8,-1,-1,-1,-1,-1,-1,-1,-1,6],
- [-1,-1,-1,-1,-1,-1,-1,-1,13,-1,-1,-1]]).
+board(Board,1):- %5x5
+  Board=[[8,-1,-1,-1,-1],
+         [-1,2,-1,1,-1],
+         [-1,-1,-1,-1,2],
+         [-1,-1,-1,1,-1],
+         [-1,2,-1,-1,2]].
+
+board(Board,2):- %8x8
+  Board=[[8,-1,-1,-1,-1,-1,-1,-1],
+         [-1,-1,-1,-1,12,-1,-1,-1],
+         [-1,-1,2,-1,-1,-1,2,-1],
+         [-1,-1,2,-1,-1,-1,2,-1],
+         [-1,-1,2,-1,-1,-1,2,-1],
+         [-1,-1,2,-1,-1,-1,-1,2],
+         [-1,-1,2,-1,-1,2,-1,-1],
+         [5,-1,2,-1,-1,-1,2,-1]].
+
+board(Board,3):-
+  Board=[[-1,-1,-1,-1,10,-1,-1,-1,-1,-1,-1,-1],
+   [2,-1,-1,-1,-1,-1,5,-1,-1,-1,-1,-1],
+   [-1,-1,6,-1,-1,-1,-1,-1,-1,-1,7,-1],
+   [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,12],
+   [-1,-1,-1,9,-1,-1,-1,-1,-1,-1,1,-1],
+   [-1,-1,-1,-1,-1,-1,-1,-1,7,-1,-1,-1],
+   [-1,4,-1,-1,-1,-1,-1,8,-1,-1,-1,-1],
+   [9,-1,-1,-1,1,-1,-1,-1,-1,-1,4,-1],
+   [-1,5,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],
+   [-1,-1,-1,-1,-1,-1,6,-1,-1,1,-1,-1],
+   [-1,-1,8,-1,-1,-1,-1,-1,-1,-1,-1,6],
+   [-1,-1,-1,-1,-1,-1,-1,-1,13,-1,-1,-1]].
 
  get_board([5-1-10,
           1-2-2,
@@ -122,38 +140,6 @@ matrix_to_list([M|Ms],CurrList,FinalList):-
 
 matrix_to_list([],FinalList,FinalList).
 
-display_board([L|Ls],N):-
-  display_line_board(L),
-  write('|'),
-  nl,
-  write('   '),
-  display_boundary(N),
-  nl,
-  display_board(Ls,N).
-
-display_board([],_).
-
-display_boundary(0).
-
-display_boundary(N):-
-  format('~t~p~4|',['-----']),
-  N1 is N-1,
-  display_boundary(N1).
-
-display_line_board([E|Es]):-
-  format('~t~p~4|~t~d~t~4+',['|',E]),
-  display_line_board(Es).
-
-display_line_board([]).
-
-display_board(Board):-
-  nl,
-  length(Board,N),
-  write('   '),
-  display_boundary(N),
-  nl,
-  display_board(Board,N).
-
 force_adjacency(Line, InitialNr, Rep):-
   force_adjacency(Line, InitialNr, Rep, 1).
 
@@ -207,8 +193,15 @@ go_through_board([Head|Rest], Result, Size, Representation):-
   Representation1 is Representation +  1,
   go_through_board(Rest, Result, Size, Representation1).
 
+reset_timer :- statistics(walltime,_).
+print_time :-
+	statistics(walltime,[_,T]),
+	format('\nTempo decorrido durante a procura da solucao: ~3d segundos.',[T]),
+  nl,
+  nl.
+
 % receives a list of : X-Y-Nr, where nr is the number of blocks we want that block to expand to
-solve_prob(Board, Result):-
+solve_prob(Board,Points,Result):-
   length(Board, N),
   length(Result, N),
   get_board_points(Board,Points),
@@ -216,5 +209,7 @@ solve_prob(Board, Result):-
   create_domains(Points,Result),
   go_through_board(Points, Result, N, 1),
   matrix_to_list(Result,[],FlatResult),
+  reset_timer,
   labeling([ffc], FlatResult),
-  display_board(Result).
+  print_time,
+  fd_statistics.
