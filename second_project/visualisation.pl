@@ -71,14 +71,13 @@ main:-
   write('------------- 5 - Visualizar solucao para puzzle 12x12 3. --------\n'),
   write('--------------------------- 6 - Sair.  ---------------------------\n'),
   read(Opt),
-  board(Board,Opt),
 	(
-		Opt = 1 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
-		Opt = 2 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
-		Opt = 3 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
-    Opt = 4 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
-    Opt = 5 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
-    Opt = 6 ->true;
+		Opt = 1 -> board(Board,Opt),solve_prob(Board,Points,Result),display_board(Result,Points),main;
+		Opt = 2 -> board(Board,Opt),solve_prob(Board,Points,Result),display_board(Result,Points),main;
+		Opt = 3 -> board(Board,Opt),solve_prob(Board,Points,Result),display_board(Result,Points),main;
+    Opt = 4 -> board(Board,Opt),solve_prob(Board,Points,Result),display_board(Result,Points),main;
+    Opt = 5 -> board(Board,Opt),solve_prob(Board,Points,Result),display_board(Result,Points),main;
+    Opt = 6;
     nl,
 		write('Opção inválida. Selecione outra opção.\n'),
     main
