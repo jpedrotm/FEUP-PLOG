@@ -66,15 +66,19 @@ main:-
   write('------------------------------------------------------------------\n'),
   write('------------- 1 - Visualizar solucao para puzzle 5x5. ------------\n'),
   write('------------- 2 - Visualizar solucao para puzzle 8x8. ------------\n'),
-  write('------------- 3 - Visualizar solucao para puzzle 12x12. ----------\n'),
-  write('--------------------------- 4 - Sair.  ---------------------------\n'),
+  write('------------- 3 - Visualizar solucao para puzzle 12x12 1. --------\n'),
+  write('------------- 4 - Visualizar solucao para puzzle 12x12 2. --------\n'),
+  write('------------- 5 - Visualizar solucao para puzzle 12x12 3. --------\n'),
+  write('--------------------------- 6 - Sair.  ---------------------------\n'),
   read(Opt),
   board(Board,Opt),
 	(
 		Opt = 1 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
 		Opt = 2 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
 		Opt = 3 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
-    Opt = 4 ->true;
+    Opt = 4 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
+    Opt = 5 -> solve_prob(Board,Points,Result),display_board(Result,Points),main;
+    Opt = 6 ->true;
     nl,
 		write('Opção inválida. Selecione outra opção.\n'),
     main
